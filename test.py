@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import torch
 import yaml
@@ -360,7 +361,7 @@ def test_custom(model, criterion, dataloader, device, cfg):
             if cfg.visual:
                 # display layout
                 DisplayLayout(img, seg, depth, polys, _seg, _depth, _polys, inputs['iseg'][i].cpu().numpy(),
-                    inputs['ilbox'][i].cpu().numpy(), iters, inputs['filename'][i])
+                    inputs['ilbox'][i].cpu().numpy(), iters, inputs['filename'][i], cfg.output_folder)
 
 def parse():
     parser = argparse.ArgumentParser()
@@ -370,6 +371,8 @@ def parse():
     parser.add_argument('--visual', action='store_true', help='whether to visual the results')
     parser.add_argument('--exam', action='store_true', help='test one example on nyu303 dataset')
     parser.add_argument('--num_workers', type=int, default=0)
+    parser.add_argument('--input_folder', type=str, default='input folder')
+    parser.add_argument('--output_folder', type=str, default='output folder')
 
     args = parser.parse_args()
     return args
@@ -381,6 +384,10 @@ if __name__ == '__main__':
     args = parse()
     cfg.update(vars(args))
 
+    # create output folder if not exist
+    if not os.path.exists(cfg.output_folder):
+        os.system(f'mkdir -p {cfg.output_folder}')
+
     if cfg.exam:
         assert cfg.data == 'NYU303', 'provide one example of nyu303 to test'
     #  dataset
@@ -389,7 +396,7 @@ if __name__ == '__main__':
     elif cfg.data == 'NYU303':
         dataset = NYU303(cfg.Dataset.NYU303, 'test', exam=cfg.exam)
     elif cfg.data == 'CUSTOM':
-        dataset = CustomDataset(cfg.Dataset.CUSTOM, 'test')
+        dataset = CustomDataset(cfg.Dataset.CUSTOM, 'test', cfg.input_folder)
     else:
         raise NotImplementedError
 

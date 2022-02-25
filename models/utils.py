@@ -533,7 +533,7 @@ def printfs(cfg):
 
 
 # display layout results
-def DisplayLayout(img, segs_opt, depth_opt, polys_opt, segs_noopt, depth_noopt, polys_noopt, segs_gt, label, iters, filename):
+def DisplayLayout(img, segs_opt, depth_opt, polys_opt, segs_noopt, depth_noopt, polys_noopt, segs_gt, label, iters, filename, output_folder):
     palette = [
         (0.12156862745098039, 0.4666666666666667, 0.7058823529411765),
         (0.6823529411764706, 0.7803921568627451, 0.9098039215686274),
@@ -680,7 +680,7 @@ def DisplayLayout(img, segs_opt, depth_opt, polys_opt, segs_noopt, depth_noopt, 
     img2 = cv2.resize(img2, (256, 256))
     # cv2.imwrite(f'results/{iters}_select.png',
     #             np.concatenate([img[:360], img1[:360], img2[:360], img3[:360]], axis=1) * 255)
-    cv2.imwrite(f'results/'+filename, img2[:360] * 255)
+    cv2.imwrite(os.path.join(output_folder, filename), img2[:360] * 255)
 
 def display2Dseg(img, segs_pred, segs_gt, label, iters, method=9, draw_gt=0):
     img = img.cpu().numpy().transpose([1, 2, 0])
