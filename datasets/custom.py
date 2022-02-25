@@ -8,7 +8,7 @@ from torch.utils import data
 
 
 class CustomDataset(data.Dataset):
-    def __init__(self, config, phase='test', files='example/'):
+    def __init__(self, config, phase='test', files='example/NYU0969/image/'):
         self.config = config
         self.phase = phase
         self.max_objs = config.max_objs

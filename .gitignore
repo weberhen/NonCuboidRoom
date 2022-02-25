@@ -135,5 +135,6 @@ dmypy.json
 Logs
 checkpoints
 #results
-#example
+example/*
 data
+*.png
