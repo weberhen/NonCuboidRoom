@@ -62,6 +62,7 @@ class CustomDataset(data.Dataset):
         ret['ixy1map'] = ixy1map
         ret['iseg'] = np.ones([inh, inw])
         ret['ilbox'] = np.zeros(20)
+        ret['filename'] = self.filenames[index]
         return ret
 
     def __len__(self):

@@ -317,7 +317,9 @@ def test_custom(model, criterion, dataloader, device, cfg):
         print(f'{iters}/{len(dataloader)}')
         # set device
         for key, value in inputs.items():
-            inputs[key] = value.to(device)
+            # skip if is not list
+            if not isinstance(value, list):
+                inputs[key] = value.to(device)
         # forward
         x = model(inputs['img'])
         loss, loss_stats = criterion(x)
@@ -358,7 +360,7 @@ def test_custom(model, criterion, dataloader, device, cfg):
             if cfg.visual:
                 # display layout
                 DisplayLayout(img, seg, depth, polys, _seg, _depth, _polys, inputs['iseg'][i].cpu().numpy(),
-                    inputs['ilbox'][i].cpu().numpy(), iters)
+                    inputs['ilbox'][i].cpu().numpy(), iters, inputs['filename'][i])
 
 def parse():
     parser = argparse.ArgumentParser()

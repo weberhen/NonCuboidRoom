@@ -533,7 +533,7 @@ def printfs(cfg):
 
 
 # display layout results
-def DisplayLayout(img, segs_opt, depth_opt, polys_opt, segs_noopt, depth_noopt, polys_noopt, segs_gt, label, iters):
+def DisplayLayout(img, segs_opt, depth_opt, polys_opt, segs_noopt, depth_noopt, polys_noopt, segs_gt, label, iters, filename):
     palette = [
         (0.12156862745098039, 0.4666666666666667, 0.7058823529411765),
         (0.6823529411764706, 0.7803921568627451, 0.9098039215686274),
@@ -624,21 +624,21 @@ def DisplayLayout(img, segs_opt, depth_opt, polys_opt, segs_noopt, depth_noopt, 
     bound_noopt = np.zeros_like(img[:, :, 0], dtype=np.float32)
     masks_gt = np.zeros_like(img, dtype=np.float32)  # gt
     bound_gt = np.zeros_like(img[:, :, 0], dtype=np.float32)
-    img1 = img
-    for i in range(len(color1)):
-        alpha_fill = (_segs_gt[i]==1)[..., None].astype(np.float32)
-        sx = cv2.Sobel(alpha_fill, cv2.CV_32F, 1, 0, ksize=5)
-        sy = cv2.Sobel(alpha_fill, cv2.CV_32F, 0, 1, ksize=5)
-        alpha_edge = (sx ** 2 + sy ** 2) ** 0.5
-        alpha_edge /= max(0.001, np.max(alpha_edge))
-        alpha_edge = alpha_edge[..., None]
-        alpha_fill *= 0.5
-        color = palette[color1][i]
-        img1 = img1 * (1 - alpha_fill) + alpha_fill * color
-        img1 = img1 * (1 - alpha_edge) + alpha_edge * color
-        bound_gt[alpha_edge[:,:,0]>0] = 1.
+    # img1 = img
+    # for i in range(len(color1)):
+    #     alpha_fill = (_segs_gt[i]==1)[..., None].astype(np.float32)
+    #     sx = cv2.Sobel(alpha_fill, cv2.CV_32F, 1, 0, ksize=5)
+    #     sy = cv2.Sobel(alpha_fill, cv2.CV_32F, 0, 1, ksize=5)
+    #     alpha_edge = (sx ** 2 + sy ** 2) ** 0.5
+    #     alpha_edge /= max(0.001, np.max(alpha_edge))
+    #     alpha_edge = alpha_edge[..., None]
+    #     alpha_fill *= 0.5
+    #     color = palette[color1][i]
+    #     img1 = img1 * (1 - alpha_fill) + alpha_fill * color
+    #     img1 = img1 * (1 - alpha_edge) + alpha_edge * color
+    #     bound_gt[alpha_edge[:,:,0]>0] = 1.
 
-    img2 = img
+    img2 = img * 0
     for i in range(len(color2)):
         alpha_fill = (_segs_noopt[i] == 1)[..., None].astype(np.float32)
         sx = cv2.Sobel(alpha_fill, cv2.CV_32F, 1, 0, ksize=5)
@@ -647,26 +647,27 @@ def DisplayLayout(img, segs_opt, depth_opt, polys_opt, segs_noopt, depth_noopt, 
         alpha_edge /= max(0.001, np.max(alpha_edge))
         alpha_edge = alpha_edge[..., None]
         alpha_fill *= 0.5
-        color = palette[color2][i]
-        img2 = img2 * (1 - alpha_fill) + alpha_fill * color
+        # color = palette[color2][i]
+        color = np.array([1,1,1]).astype(np.float32)
+        # img2 = img2 * (1 - alpha_fill) + alpha_fill * color
         img2 = img2 * (1 - alpha_edge) + alpha_edge * color
 
         bound_noopt[alpha_edge[:,:,0]>0]=1
 
-    img3=img
-    for i in range(len(color3)):
-        alpha_fill = (_segs_opt[i] == 1)[..., None].astype(np.float32)
-        sx = cv2.Sobel(alpha_fill, cv2.CV_32F, 1, 0, ksize=5)
-        sy = cv2.Sobel(alpha_fill, cv2.CV_32F, 0, 1, ksize=5)
-        alpha_edge = (sx ** 2 + sy ** 2) ** 0.5
-        alpha_edge /= max(0.001, np.max(alpha_edge))
-        alpha_edge = alpha_edge[..., None]
-        alpha_fill *= 0.5
-        color = palette[color3][i]
-        img3 = img3 * (1 - alpha_fill) + alpha_fill * color
-        img3 = img3 * (1 - alpha_edge) + alpha_edge * color
+    # img3=img
+    # for i in range(len(color3)):
+    #     alpha_fill = (_segs_opt[i] == 1)[..., None].astype(np.float32)
+    #     sx = cv2.Sobel(alpha_fill, cv2.CV_32F, 1, 0, ksize=5)
+    #     sy = cv2.Sobel(alpha_fill, cv2.CV_32F, 0, 1, ksize=5)
+    #     alpha_edge = (sx ** 2 + sy ** 2) ** 0.5
+    #     alpha_edge /= max(0.001, np.max(alpha_edge))
+    #     alpha_edge = alpha_edge[..., None]
+    #     alpha_fill *= 0.5
+    #     color = palette[color3][i]
+    #     img3 = img3 * (1 - alpha_fill) + alpha_fill * color
+    #     img3 = img3 * (1 - alpha_edge) + alpha_edge * color
 
-        bound_opt[alpha_edge[:,:,0]>0]=1.
+    #     bound_opt[alpha_edge[:,:,0]>0]=1.
 
     img4=np.copy(img)
     img4[bound_gt==1]=np.array([0, 1, 0])
@@ -675,8 +676,11 @@ def DisplayLayout(img, segs_opt, depth_opt, polys_opt, segs_noopt, depth_noopt, 
     img6=np.copy(img)
     img6[bound_opt==1]=np.array([0, 1, 0])
 
-    cv2.imwrite(f'results/{iters}_select.png',
-                np.concatenate([img[:360], img1[:360], img2[:360], img3[:360]], axis=1) * 255)
+    # rescale back to (256,256,3)
+    img2 = cv2.resize(img2, (256, 256))
+    # cv2.imwrite(f'results/{iters}_select.png',
+    #             np.concatenate([img[:360], img1[:360], img2[:360], img3[:360]], axis=1) * 255)
+    cv2.imwrite(f'results/'+filename, img2[:360] * 255)
 
 def display2Dseg(img, segs_pred, segs_gt, label, iters, method=9, draw_gt=0):
     img = img.cpu().numpy().transpose([1, 2, 0])
@@ -778,6 +782,6 @@ def display2Dseg(img, segs_pred, segs_gt, label, iters, method=9, draw_gt=0):
     if not os.path.exists(f'results'):
         os.mkdir(f'results/')
     
-    cv2.imwrite(f'results/{iters}.png', img2 * 255)
-    if draw_gt > 0:
-        cv2.imwrite(f'results/{iters}_{draw_gt}.png', img1 * 255)
+    cv2.imwrite(f'results/''{iters}.png', img2 * 255)
+    # if draw_gt > 0:
+    #     cv2.imwrite(f'results/{iters}_{draw_gt}.png', img1 * 255)
